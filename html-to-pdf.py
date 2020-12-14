@@ -8,7 +8,7 @@ import matplotlib.cbook as cbook
 from matplotlib.pyplot import figure
 import requests
 import json
-import ssl 
+import ssl
 import pandas as pd
 import matplotlib as mlp
 from __future__ import print_function
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt, mpld3
 
 
 os.chdir("C:\\Users\\Saranyu Technologies\\Desktop\\html-To-pdf")
-print(os.getcwd(), " : current dir ")
+print("current dir : " , os.getcwd())
 
 report_date = []
 reportTraffic_Total_speed = []
@@ -42,11 +42,13 @@ groupLowHigh = []
 url = "https://r2d2.nxtgen.com/ui/api1.0/perfreport/all"
 
 payload="{\r\n    \"category\": \"Firewall\",\r\n    \"item\": \"\",\r\n    \"list\": \"10.225.11.20\",\r\n    \"metrics\": \"380..TommyHil-3021\",\r\n    \"TimeZone\": \"Asia/Kolkata\",\r\n    \"start_datetime\": \"2020-11-01 01:11\",\r\n    \"end_datetime\": \"2020-11-30 18:11\"\r\n}"
+
 headers = {
   'sessionkey': 'bbc3634bdfeadeb0b0885f71ca1caebfe8fb1bde010e9738816a2753c33f457df4d2f8757522d0cc6c8eb9b940c3bca6c71c8b9b67eaf3434090c1520a290b4d',
   'Content-Type': 'application/json'
 }
 
+print(payload, ' payload')
 response = requests.request("POST", url, headers=headers, data=payload, verify = False)
 
 if response.status_code ==200:
@@ -131,17 +133,17 @@ if response.status_code ==200:
 
 if response.status_code ==200:
     
-#     print(plotters , ' plotters')
-#     print(bandPlotName , ' bandPlotName')
-#     print(plotsdata['plots'] , ' allData')
-
-#     dataframe = pd.read_csv("datafile-2.csv", index_col=0)
-
-    # print(dataframe.head(5))
     fig, ax = plt.subplots()
     fig.set_size_inches(12, 7)
     fig.autofmt_xdate()
-    ax.bar(report_date, reportTraffic_Total_speed)
+    
+    ax.plot(report_date, reportTraffic_Total_speed, label='Total Speed')
+    ax.plot(report_date, reportTraffic_In_speed , label='In Speed')
+    ax.plot(report_date, reportTraffic_Out_speed, label='Out Speed')
+    ax.set_ylabel('Mbit/s')
+    ax.set_title('AutoIntelli Report')
+    ax.legend()
+    
     ax = plt.gca()
     plt.xticks(rotation=70)
     for label in ax.get_xaxis().get_ticklabels()[::2]:
@@ -155,44 +157,27 @@ if response.status_code ==200:
     for label in ax.get_xaxis().get_ticklabels()[::2]:
         label.set_visible(False)  
 #     plt.savefig('datagraph.jpg',dpi=100)
-#     plt.fig_to_html()
-#     print(plt.fig_to_html())
-    
-    
-    options = {
-        "enable-local-file-access": None,
-        'margin-top': '0.50in',
-        'margin-bottom': '0.50in',
-        'margin-right': '0.10in',
-        'margin-left': '0.10in',
-        'encoding': "UTF-8",
-        'no-outline': None
-    }
-
 
     figfile = BytesIO()
     plt.savefig(figfile, format='png')
     figfile.seek(0)
     figdata_png = base64.b64encode(figfile.getvalue())
-#     print(figdata_png, ' figdata_png')
-    
     tmpfile = BytesIO()
     plt.savefig(tmpfile, format='png')
     
     encoded = base64.b64encode(tmpfile.getvalue())
+    plt.show()
+    
     
     
     htmltemple = """
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <title>Autointelli Report</title>
-
     <style>
         .graph {
             margin-bottom: 20px;
@@ -222,16 +207,56 @@ if response.status_code ==200:
             background-color: #ececec;
             padding: 10px 10px;
         }
+        .topTitle{
+        margin-bottom: 20px;
+}
+.topTitle h3{
+font-size: 15px;
+font-weight: bold;
+background-color: #ececec;
+}
+.topTitle p{
+font-size: 14px;
+}
+
+.left{
+float: left ;
+width: 20%;
+}
     </style>
-
 </head>
-
 <body>
+
+<div class="topTitle">
+	<div class="clearfix">
+		<div class="left ">
+			<h3>Category</h3>
+			<p>{{payload['category']}}</p>
+		</div>
+		<div class="left ">
+			<h3>Object</h3>
+			<p>{{payload['list']}}</p>
+		</div>
+		<div class="left ">
+			<h3>Metrics</h3>
+			<p>{{payload['metrics']}}</p>
+		</div>
+		<div class="left ">
+			<h3>Sensor Type</h3>
+			<p></p>
+		</div>
+
+		<div class="left ">
+			<h3>Interval</h3>
+			<p></p>
+		</div>
+    </div>
+    </div>
+
 
     <div class="graph">
         <img src="data:image/png;base64,{{fig}}">
     </div>
-
     <div class="row">
         <div class="col-md-4">
             <h2>Average</h2>
@@ -352,7 +377,7 @@ if response.status_code ==200:
     </script>
 </body>
 
-</html> 
+</html>
     """
     
     template = Template(htmltemple)
@@ -365,7 +390,17 @@ if response.status_code ==200:
         allData = allData,
         AverageData = AverageData,
         SumsData = SumsData,
-        LowHighData = groupLowHigh)
-
+        LowHighData = groupLowHigh,
+        payload= json.loads(payload))
+    
+    options = {
+        "enable-local-file-access": None,
+        'margin-top': '0.50in',
+        'margin-bottom': '0.50in',
+        'margin-right': '0.10in',
+        'margin-left': '0.10in',
+        'encoding': "UTF-8",
+        'no-outline': None
+    }
     pdfkit.from_string(template_render,'my_testpdf.pdf', options=options)
     print("PDF Generated...")
